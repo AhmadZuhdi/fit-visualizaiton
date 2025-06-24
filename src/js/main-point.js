@@ -3,35 +3,10 @@ import { initializeMap, fitToBounds } from './map-init.js';
 import { loadGeoJsonData } from './data-utils.js';
 import { initializeEventListeners } from './event-listeners.js';
 import { initializeCanvasRecording } from './recording.js';
+import { appState } from './config.js';
 
-// Global state object to share between modules
-window.appState = {
-    map: null,
-    geoJsonData: null,
-    routeLayer: null,
-    pointsLayer: null,
-    currentMode: 'route',
-    speedUnit: 'kmh',
-    showTooltips: true,
-    currentSizePreset: 'fullscreen',
-    animationRunning: false,
-    animationInterval: null,
-    animationIndex: 0,
-    animationCoords: [],
-    animationMarker: null,
-    animationStartTime: null,
-    followMarker: true,
-    // Recording state
-    canvasRecorder: null,
-    recordingCanvas: null,
-    recordingContext: null,
-    isRecording: false,
-    recordingFrameCount: 0,
-    recordingDuration: 10,
-    recordingFrameRate: 30,
-    recordingFormat: 'mp4',
-    recordingStatus: 'idle'
-};
+// Make appState globally available for backward compatibility
+window.appState = appState;
 
 // =======================
 // INITIALIZATION

@@ -434,3 +434,57 @@ body {
     background: #28a745;
     animation: pulse 1.5s infinite;
 }
+
+/* OpenLayers rotation controls */
+.rotation-control {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    padding: 5px;
+    z-index: 1000;
+}
+
+.rotation-control button {
+    background: white;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.rotation-control button:hover {
+    background: #f0f0f0;
+}
+
+.rotation-control button:active {
+    background: #e0e0e0;
+}
+
+/* OpenLayers tooltip styles */
+.ol-tooltip {
+    position: relative;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 4px;
+    color: white;
+    padding: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    display: none;
+}
+
+.ol-tooltip:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+}
