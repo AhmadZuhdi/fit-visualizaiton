@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Parcel build output
+dist/
+.parcel-cache/
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# IDE
+.vscode/
+.idea/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Video export files
+*.mp4
+*.webm
+*.gif
+
+src/data/

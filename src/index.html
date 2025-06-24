@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fit File Visualization</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/map-styles.css">
+</head>
+<body>
+    <div id="map"></div>
+    
+    <!-- Info Panel -->
+
+    <div class="info-panel">
+        <div>
+            <h3>Select File</h3>
+            <input type="file" accept=".fit" id="file-input" style="width: 100%;">
+        </div>
+        <hr>
+        <div>
+            <h3>Ride Data</h3>
+            <p id="total-points">Loading...</p>
+            <p id="total-distance">Total Distance: Calculating...</p>
+            <p id="duration">Duration: Calculating...</p>
+            <p id="avg-speed">Avg Speed: Calculating...</p>
+            <p id="max-speed">Max Speed: Calculating...</p>
+            <p id="avg-heart-rate">Avg Heart Rate: Calculating...</p>
+        </div>
+    </div>
+    
+    <!-- Main Controls -->
+    <div class="controls">
+        <button id="show-route" class="active">Show Route</button>
+        <button id="show-points">Show Points</button>
+        <button id="show-heatmap">Speed Heatmap</button>
+        <button id="animate-route">Animate Route</button>
+        <button id="fit-bounds">Fit to Route</button>
+        <button id="speed-unit-toggle" class="speed-toggle">Speed: km/h</button>
+        <button id="tooltip-toggle" class="tooltip-toggle">Tooltips: ON</button>
+        <button id="size-toggle" class="size-toggle">📐 Size</button>
+        <button id="record-toggle" class="record-toggle">🎥 Record</button>
+    </div>
+
+    <!-- Animation Controls -->
+    <div class="animation-controls" id="animation-controls">
+        <div>
+            <button id="play-pause" class="play">▶ Play</button>
+            <button id="next-step">Next</button>
+            <button id="stop-animation">⏹ Stop</button>
+            <button id="restart-animation">⏮ Restart</button>
+            <button id="toggle-follow" class="active">📍 Follow</button>
+        </div>
+        <div class="speed-control">
+            Interval: <input type="number" id="animation-speed" min="5" max="1000" value="10" style="width: 60px;"> <span id="speed-value">ms</span>
+        </div>
+        <div style="font-size: 11px; margin-top: 5px;">
+            Progress: <span id="animation-progress">0%</span> | Time: <span id="animation-time">00:00:00</span>
+        </div>
+    </div>
+    
+    <!-- Size Controls -->
+    <div class="size-controls" id="size-controls">
+        <h4>📐 Map Size & Aspect Ratio</h4>
+        <div class="preset-buttons">
+            <button id="preset-fullscreen" class="active">🖥️ Fullscreen</button>
+            <button id="preset-youtube">📺 YouTube (16:9)</button>
+            <button id="preset-instagram-square">📷 IG Square (1:1)</button>
+            <button id="preset-instagram-story">📱 IG Story (9:16)</button>
+            <button id="preset-tiktok">🎵 TikTok (9:16)</button>
+            <button id="preset-twitter">🐦 Twitter (16:9)</button>
+            <button id="preset-facebook">📘 Facebook (1.91:1)</button>
+            <button id="preset-custom">⚙️ Custom</button>
+        </div>
+        <div class="custom-size" id="custom-size" style="display: none;">
+            <div>
+                <label for="custom-width">Width (px):</label>
+                <input type="number" id="custom-width" value="1280" min="200" max="3000">
+            </div>
+            <div>
+                <label for="custom-height">Height (px):</label>
+                <input type="number" id="custom-height" value="720" min="200" max="2000">
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <button id="apply-size" style="background: #28a745; padding: 8px 16px;">✅ Apply Size</button>
+        </div>
+    </div>
+
+    <!-- Recording Controls -->
+    <div class="recording-controls" id="recording-controls">
+        <h4>🎥 Video Recording</h4>
+        
+        <div id="recording-indicator" class="recording-indicator" style="display: none;">
+            🔴 Recording...
+        </div>
+        
+        <div id="recording-progress" class="recording-progress" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">0/300 frames | 10.0s remaining</div>
+        </div>
+        
+        <button id="record-button" class="record-button">🎥 Start Recording</button>
+        
+        <div class="recording-options">
+            <div>
+                <label for="recording-duration">Duration (s):</label>
+                <input type="number" id="recording-duration" value="10" min="1" max="60">
+            </div>
+            <div>
+                <label for="recording-framerate">Frame Rate:</label>
+                <select id="recording-framerate">
+                    <option value="24">24 fps</option>
+                    <option value="30" selected>30 fps</option>
+                    <option value="60">60 fps</option>
+                </select>
+            </div>
+            <div>
+                <label for="recording-format">Format:</label>
+                <select id="recording-format">
+                    <option value="mp4" selected>MP4</option>
+                    <option value="webm">WebM</option>
+                    <option value="gif">GIF</option>
+                </select>
+            </div>
+            <div>
+                <label for="recording-quality">Quality:</label>
+                <select id="recording-quality">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+        </div>
+        
+        <button id="record-animation" class="record-button" style="background: #007bff;">
+            🎬 Record Animation
+        </button>
+    </div>    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+    
+    <!-- Main Application Script -->
+    <script type="module" src="js/main-point.js"></script>
+</body>
+</html>

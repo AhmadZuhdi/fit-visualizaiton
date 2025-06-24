@@ -1,0 +1,40 @@
+{
+  "name": "flyover-effect-video",
+  "version": "1.0.0",
+  "description": "A map visualization app with animated route playback and video recording capabilities",
+  "scripts": {
+    "start": "parcel src/index.html --port 3000",
+    "build": "parcel build src/index.html --dist-dir dist --public-url ./",
+    "dev": "parcel serve src/index.html --port 3000",
+    "clean": "rm -rf dist .parcel-cache",
+  },
+  "dependencies": {
+    "canvas-record": "^5.3.0",
+    "easy-fit": "^0.0.8",
+    "fit-geojson-converter": "^1.0.6"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.12.0",
+    "crypto-browserify": "^3.12.1",
+    "events": "^3.3.0",
+    "ffmpeg-static": "^4.4.0",
+    "live-server": "^1.2.1",
+    "minimist": "^1.2.8",
+    "parcel": "^2.12.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "puppeteer": "^22.8.2",
+    "stream-browserify": "^3.0.0",
+    "string_decoder": "^1.3.0",
+    "vm-browserify": "^1.1.2"
+  },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 Edge versions"
+  ],
+  "source": "src/index.html",
+  "author": "Ahmad Zuhdi (ahmad.zuhdi.y@gmail.com)",
+  "license": "ISC"
+}
