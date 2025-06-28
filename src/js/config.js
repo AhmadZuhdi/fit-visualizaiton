@@ -47,7 +47,10 @@ export const appState = {
     recordingDuration: 10,
     recordingFrameRate: 30,
     recordingFormat: 'mp4',
-    recordingStatus: 'idle'
+    recordingStatus: 'idle',
+
+    // images state
+    images: [],
 };
 
 // Make appState available globally for compatibility

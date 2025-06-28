@@ -6,6 +6,7 @@ import { toggleRecording, setRecordingOptions, recordAnimationSequence } from '.
 import { fitToBounds } from './map-init.js';
 import { appState } from './config.js';
 import './file-input-listener.js';
+import './photo-picker.js'
 
 export function initializeEventListeners() {
     // Main control buttons

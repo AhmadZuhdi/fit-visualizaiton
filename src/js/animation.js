@@ -47,6 +47,10 @@ export function startAnimation() {
         alert('No animation data available');
         return;
     }
+
+    if (appState.images.length > 0) {
+        appState.images = appState.images.toSorted((a, b) => a.timestamp - b.timestamp);
+    }
     
     console.log('Clearing previous layers and starting animation');
     clearAllLayers();
@@ -62,7 +66,7 @@ export function startAnimation() {
     })).addTo(appState.map);
     console.log('Route layer added to map', appState.routeLayer);
     
-    appState.animationIndex = 0;
+    appState.animationIndex = 8600;
     appState.animationStartTime = Date.now();
     
     if (appState.animationMarker) {
@@ -94,7 +98,7 @@ export function startAnimation() {
     console.log('Setting map view to the first point');
     if (appState.followMarker) {
         appState.map.setView(currentPoint.latlng, appState.map.getZoom(), {
-            animate: true,
+            animate: false,
             duration: 1
         });
     }
@@ -177,6 +181,7 @@ export function animateStep() {
     }
     
     const currentPoint = appState.animationCoords[appState.animationIndex];
+
     const prevPoint = appState.animationIndex > 0 ? appState.animationCoords[appState.animationIndex - 1] : null;              // Update marker position
 
     if (appState.animationMarker) {
@@ -215,6 +220,23 @@ export function animateStep() {
     const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     document.getElementById('animation-time').textContent = timeString;
     
+    // if (appState.images.length > 0) {
+    //     const selectedImage = appState.images[0]
+        
+    //     // Check if the current point's timestamp is close to the image's timestamp
+    //     if ((currentPoint.properties.timestamp - selectedImage.timestamp) < 322) {
+    //         const coor = selectedImage.coordinates || currentPoint.latlng;
+
+    //         appState.images.shift(); // Remove the image after displaying it
+
+    //         pauseAnimation(); // Pause animation after showing the image
+
+    //         setTimeout(() => {
+    //             startAnimation();
+    //         }, 2000); // Resume animation after 2 seconds
+    //     }
+    // }
+
     appState.animationIndex++;
 }
 

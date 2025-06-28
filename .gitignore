@@ -32,3 +32,5 @@ Thumbs.db
 *.gif
 
 src/data/
+
+data/
