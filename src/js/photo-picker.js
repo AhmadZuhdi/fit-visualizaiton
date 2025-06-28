@@ -79,13 +79,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('Converted to decimal:', lat, lng);
                     
                     const coor = [lat, lng];                    
-                    appState.images.push({
-                        file: file,
-                        coordinates: coor,
-                        timestamp: tags.DateTimeOriginal ? parseExifDate(tags.DateTimeOriginal.description) : new Date()
-                    });
 
-                    L.marker(coor, {
+                    const marker = L.marker(coor, {
                         icon: L.divIcon({
                             className: 'photo-marker',
                             html: `<div style="background: rgba(255, 255, 255, 0.8); padding: 4px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
@@ -96,6 +91,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         })                
                     })
                     .addTo(appState.map);
+
+                    appState.images.push({
+                        marker,
+                        timestamp: tags.DateTimeOriginal ? parseExifDate(tags.DateTimeOriginal.description) : new Date()
+                    });
                 }
             };
             reader.readAsArrayBuffer(file);

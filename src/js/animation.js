@@ -113,7 +113,7 @@ export function startAnimation() {
     document.getElementById('animation-controls').style.display = 'block';
     
     console.log('Starting animation interval');
-    appState.animationInterval = setInterval(animateStep, getAnimationInterval());
+    startInterval();
 }
 
 export function pauseAnimation() {
@@ -220,24 +220,23 @@ export function animateStep() {
     const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     document.getElementById('animation-time').textContent = timeString;
     
-    // if (appState.images.length > 0) {
-    //     const selectedImage = appState.images[0]
+    if (appState.images.length > 0) {
+        const selectedImage = appState.images[0]
         
-    //     // Check if the current point's timestamp is close to the image's timestamp
-    //     if ((currentPoint.properties.timestamp - selectedImage.timestamp) < 322) {
-    //         const coor = selectedImage.coordinates || currentPoint.latlng;
+        // Check if the current point's timestamp is close to the image's timestamp
+        if (Math.abs(currentPoint.properties.timestamp - selectedImage.timestamp) < 322) {
 
-    //         appState.images.shift(); // Remove the image after displaying it
+            appState.map.removeLayer(selectedImage.marker); // Remove the image marker if it exists
 
-    //         pauseAnimation(); // Pause animation after showing the image
-
-    //         setTimeout(() => {
-    //             startAnimation();
-    //         }, 2000); // Resume animation after 2 seconds
-    //     }
-    // }
+            appState.images.shift(); // Remove the image after displaying it
+        }
+    }
 
     appState.animationIndex++;
+}
+
+export function startInterval() {
+    appState.animationInterval = setInterval(animateStep, getAnimationInterval());
 }
 
 export function showAnimatedRoute() {
