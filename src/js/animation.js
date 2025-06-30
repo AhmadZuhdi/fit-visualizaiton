@@ -3,6 +3,8 @@ import { appState } from './config.js';
 import { formatSpeed } from './data-utils.js';
 import { clearAllLayers } from './map-layers.js';
 
+const IMAGE_TIMESTAMP_THRESHOLD = 322; // ms threshold for matching image to animation point
+
 export function getAnimationInterval() {
     const speedControl = document.getElementById('animation-speed');
     return speedControl ? parseInt(speedControl.value) : 100;
@@ -66,7 +68,7 @@ export function startAnimation() {
     })).addTo(appState.map);
     console.log('Route layer added to map', appState.routeLayer);
     
-    appState.animationIndex = 8600;
+    appState.animationIndex = 0;
     appState.animationStartTime = Date.now();
     
     if (appState.animationMarker) {
@@ -224,7 +226,7 @@ export function animateStep() {
         const selectedImage = appState.images[0]
         
         // Check if the current point's timestamp is close to the image's timestamp
-        if (Math.abs(currentPoint.properties.timestamp - selectedImage.timestamp) < 322) {
+        if (Math.abs(currentPoint.properties.timestamp - selectedImage.timestamp) < IMAGE_TIMESTAMP_THRESHOLD) {
 
             appState.map.removeLayer(selectedImage.marker); // Remove the image marker if it exists
 

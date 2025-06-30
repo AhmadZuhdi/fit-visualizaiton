@@ -32,8 +32,9 @@ export function showPoints() {
     appState.geoJsonData.features.forEach((feature, index) => {
         const coords = feature.geometry.coordinates[0];
         const speed = feature.properties.speed || 0;
-        
-        const marker = L.circleMarker([coords[0], coords[1]], {
+        const coor = [coords[0], coords[1]];
+
+        const marker = L.circleMarker(coor, {
             radius: 4,
             fillColor: getSpeedColor(speed),
             color: '#000',
@@ -49,6 +50,46 @@ export function showPoints() {
                 className: 'custom-tooltip'
             });
         }
+
+        marker.on('click', () => {
+            const elem = document.getElementById('single-photo-picker')
+            if (!elem) return;
+
+            const handleFileChange = function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    console.log('File loaded:', file.name, 'Size:', file.size, 'Bytes');
+                    console.log('creating marker for coordinates:', coor);
+                    const marker = L.marker(coor, {
+                        icon: L.divIcon({
+                            className: 'photo-marker',
+                            html: `<div style="background: rgba(255, 255, 255, 0.8); padding: 4px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                            <img src="${URL.createObjectURL(file)}" style="width: 100%; height: auto; border-radius: 4px;">
+                            </div>`,
+                            iconSize: [60, 60],
+                            iconAnchor: [30, 30]
+                        })                
+                    })
+                    .addTo(appState.map);
+                    console.log('Marker created:', marker);
+
+                    appState.images.push({
+                        marker,
+                        timestamp: feature.properties.time || new Date()
+                    });
+                    console.log('Image added to appState:', appState.images.length, 'images total');
+
+                    elem.removeEventListener('change', handleFileChange); // Remove listener after use
+                }
+                reader.readAsArrayBuffer(file);
+            };
+
+            elem.addEventListener('change', handleFileChange);
+            elem.click();
+        });
         
         pointsGroup.addLayer(marker);
     });

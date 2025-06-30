@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const arrayBuffer = e.target.result;
-                  const tags = await exif.load(arrayBuffer);
+                const tags = await exif.load(arrayBuffer);
                 console.log('EXIF Tags:', tags);
                 
                 if (tags.GPSLatitude && tags.GPSLongitude) {
@@ -99,6 +99,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             };
             reader.readAsArrayBuffer(file);
-       });
+        });
     });
 });

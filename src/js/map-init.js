@@ -2,7 +2,7 @@
 import { appState } from './config.js';
 
 export function initializeMap() {
-    appState.map = L.map('map', { preferCanvas: true }).setView([-6.298276036977768, 106.91896677017212], 15);
+    appState.map = L.map('map', { preferCanvas: true }).setView([-7.9050484,112.90805], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

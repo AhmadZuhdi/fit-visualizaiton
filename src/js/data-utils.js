@@ -1,5 +1,4 @@
 // Data utilities and statistics calculations
-import { features } from 'process';
 import { appState } from './config.js';
 
 export function getSpeedColor(speed) {
@@ -120,6 +119,8 @@ export function createTooltip(properties, index) {
             Speed: ${speed}<br>
             Heart Rate: ${heartRate}<br>
             Elevation: ${elevation}
+            <hr>
+            <span>Click to add photo</span>
         </div>
     `;
 }

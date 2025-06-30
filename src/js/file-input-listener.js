@@ -1,9 +1,21 @@
-// file-input-listener.js
-// Adds a listener to the file input to simulate fs.readFileSync in the browser
-import * as geoJsonConverter from 'fit-geojson-converter';
 import EzFit from 'easy-fit';
 import { appState } from './config.js';
 import { calculateStatistics, updateInfoPanel } from './data-utils.js';
+import {showRoute} from './map-layers.js'
+import { fitToBounds } from './map-init.js';
+
+// Convert callback-based ezFit.parse to Promise
+function parseFitFile(ezFit, uint8Array) {
+    return new Promise((resolve, reject) => {
+        ezFit.parse(uint8Array, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        });
+    });
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('file-input');
@@ -21,11 +33,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // You can convert to Uint8Array if needed
             const uint8Array = new Uint8Array(arrayBuffer);
             // Do something with the file data here
-            console.log('File loaded:', file.name, 'Size:', file.size, 'Bytes');
+            console.log('File loaded:', file.name, 'Size:', file.size, 'Bytes');            try {
+                const data = await parseFitFile(ezFit, uint8Array);
 
-            ezFit.parse(uint8Array, (err, data) => {
-                if (err || !data?.records) {
-                    console.error('Error parsing FIT file:', err);
+                if (!data?.records) {
+                    console.error('No records found in FIT file');
                     return;
                 }
 
@@ -37,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: "Feature",
                         properties: {
                             "timestamp": record.timestamp,
+                            "time": record.timestamp,
                             "elapsed_time": record.elapsed_time,
                             "position_lat": record.position_lat,
                             "position_long": record.position_long,
@@ -61,7 +74,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const stats = calculateStatistics(geojson.features);
                 updateInfoPanel(stats);
-            });
+                showRoute()
+                fitToBounds()
+            } catch (err) {
+                console.error('Error parsing FIT file:', err);
+            }
         };
         reader.readAsArrayBuffer(file);
     });
