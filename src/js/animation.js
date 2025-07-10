@@ -1,6 +1,6 @@
 // Animation functionality for route playback
 import { appState } from './config.js';
-import { formatSpeed } from './data-utils.js';
+import { formatSpeed, getSpeedColor } from './data-utils.js';
 import { clearAllLayers } from './map-layers.js';
 
 const IMAGE_TIMESTAMP_THRESHOLD = 322; // ms threshold for matching image to animation point
@@ -26,7 +26,7 @@ export function createAnimationTooltipContent(animationPoint) {
 export function prepareAnimationData() {
     if (!appState.geoJsonData) return;
     
-    appState.animationCoords = appState.geoJsonData.features.map(feature => {
+    const allCoords = appState.geoJsonData.features.map(feature => {
         const coords = feature.geometry.coordinates[0];
         return {
             latlng: [coords[0], coords[1]],
@@ -34,7 +34,15 @@ export function prepareAnimationData() {
         };
     });
     
-    console.log('Animation data prepared:', appState.animationCoords.length, 'points');
+    // Calculate 5% boundaries
+    const totalPoints = allCoords.length;
+    const startIndex = Math.floor(totalPoints * 0.01);
+    const endIndex = totalPoints - startIndex;
+    
+    // Use only the middle 90% of the route
+    appState.animationCoords = allCoords.slice(startIndex, endIndex);
+    
+    console.log(`Animation data prepared: ${appState.animationCoords.length} points (${totalPoints} total, trimmed ${startIndex} from start, ${totalPoints - endIndex} from end)`);
 }
 
 export function startAnimation() {
@@ -57,7 +65,7 @@ export function startAnimation() {
     console.log('Clearing previous layers and starting animation');
     clearAllLayers();
     
-    console.log('Preparing route layer for animation');
+    console.log('Preparing route layer for animation (middle 90% of route)');
     const routeCoords = appState.animationCoords.map(point => point.latlng);
     appState.routeLayer = L.layerGroup();
     appState.routeLayer.addLayer(L.polyline(routeCoords, {
@@ -66,7 +74,7 @@ export function startAnimation() {
         opacity: 0.8,
         smoothFactor: 1
     })).addTo(appState.map);
-    console.log('Route layer added to map', appState.routeLayer);
+    console.log('Route layer added to map (trimmed route):', appState.routeLayer);
     
     appState.animationIndex = 0;
     appState.animationStartTime = Date.now();
@@ -114,6 +122,14 @@ export function startAnimation() {
     
     document.getElementById('animation-controls').style.display = 'block';
     
+    // Show animation status display
+    const statusDisplay = document.getElementById('animation-status');
+    if (statusDisplay) {
+        statusDisplay.style.display = 'flex';
+        updateAnimationStatus(currentPoint);
+        initializeDragFunctionality();
+    }
+    
     console.log('Starting animation interval');
     startInterval();
 }
@@ -146,6 +162,17 @@ export function stopAnimation() {
     
     appState.animationIndex = 0;
     
+    // Hide animation status display
+    const statusDisplay = document.getElementById('animation-status');
+    if (statusDisplay) {
+        statusDisplay.style.display = 'none';
+        // Reset position to default
+        statusDisplay.style.left = '50%';
+        statusDisplay.style.top = 'auto';
+        statusDisplay.style.bottom = '20px';
+        statusDisplay.style.transform = 'translateX(-50%)';
+    }
+    
     const playPauseBtn = document.getElementById('play-pause');
     if (playPauseBtn) {
         playPauseBtn.textContent = '▶ Play';
@@ -161,30 +188,18 @@ export function restartAnimation() {
     startAnimation();
 }
 
-export function getSpeedColor(speed) {
-    // Speed color scale (converting to a consistent unit for color mapping)
-    // Always use km/h for consistent color scaling regardless of display unit
-    const kmh = speed * 3.6;
-    if (kmh < 5) return '#313695';
-    if (kmh < 10) return '#4575b4';
-    if (kmh < 15) return '#74add1';
-    if (kmh < 20) return '#abd9e9';
-    if (kmh < 25) return '#e0f3f8';
-    if (kmh < 30) return '#fee090';
-    if (kmh < 35) return '#fdae61';
-    if (kmh < 40) return '#f46d43';
-    return '#d73027';
-}
-
 export function animateStep() {
     if (!appState.animationRunning || appState.animationIndex >= appState.animationCoords.length) {
         stopAnimation();
         return;
     }
+      const currentPoint = appState.animationCoords[appState.animationIndex];
+    const prevPoint = appState.animationIndex > 0 ? appState.animationCoords[appState.animationIndex - 1] : null;
     
-    const currentPoint = appState.animationCoords[appState.animationIndex];
-
-    const prevPoint = appState.animationIndex > 0 ? appState.animationCoords[appState.animationIndex - 1] : null;              // Update marker position
+    // Update animation status display
+    updateAnimationStatus(currentPoint);
+    
+    // Update marker position
 
     if (appState.animationMarker) {
         appState.animationMarker.setLatLng(currentPoint.latlng);
@@ -245,4 +260,152 @@ export function showAnimatedRoute() {
     startAnimation();
     document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
     document.getElementById('animate-route').classList.add('active');
+}
+
+// Make animation status display draggable
+export function initializeDragFunctionality() {
+    const statusDisplay = document.getElementById('animation-status');
+    if (!statusDisplay) return;
+    
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+    
+    statusDisplay.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        statusDisplay.classList.add('dragging');
+        
+        // Get initial mouse position
+        startX = e.clientX;
+        startY = e.clientY;
+        
+        // Get initial element position
+        const rect = statusDisplay.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        
+        // Remove transform to use absolute positioning
+        statusDisplay.style.transform = 'none';
+        statusDisplay.style.left = startLeft + 'px';
+        statusDisplay.style.top = startTop + 'px';
+        statusDisplay.style.bottom = 'auto';
+        
+        // Prevent text selection
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        
+        // Calculate new position
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        
+        let newLeft = startLeft + deltaX;
+        let newTop = startTop + deltaY;
+        
+        // Constrain to viewport
+        const rect = statusDisplay.getBoundingClientRect();
+        const maxLeft = window.innerWidth - rect.width;
+        const maxTop = window.innerHeight - rect.height;
+        
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+        
+        statusDisplay.style.left = newLeft + 'px';
+        statusDisplay.style.top = newTop + 'px';
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            statusDisplay.classList.remove('dragging');
+        }
+    });
+    
+    // Touch events for mobile
+    statusDisplay.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        statusDisplay.classList.add('dragging');
+        
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        
+        const rect = statusDisplay.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        
+        statusDisplay.style.transform = 'none';
+        statusDisplay.style.left = startLeft + 'px';
+        statusDisplay.style.top = startTop + 'px';
+        statusDisplay.style.bottom = 'auto';
+        
+        e.preventDefault();
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - startX;
+        const deltaY = touch.clientY - startY;
+        
+        let newLeft = startLeft + deltaX;
+        let newTop = startTop + deltaY;
+        
+        const rect = statusDisplay.getBoundingClientRect();
+        const maxLeft = window.innerWidth - rect.width;
+        const maxTop = window.innerHeight - rect.height;
+        
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+        
+        statusDisplay.style.left = newLeft + 'px';
+        statusDisplay.style.top = newTop + 'px';
+        
+        e.preventDefault();
+    });
+    
+    document.addEventListener('touchend', () => {
+        if (isDragging) {
+            isDragging = false;
+            statusDisplay.classList.remove('dragging');
+        }
+    });
+}
+
+// Update animation status display
+export function updateAnimationStatus(currentPoint) {
+    if (!currentPoint) return;
+    
+    const speedElement = document.getElementById('current-speed');
+    const timeElement = document.getElementById('current-time');
+    const distanceElement = document.getElementById('current-distance');
+    const progressElement = document.getElementById('current-progress');
+    
+    if (speedElement) {
+        const speed = currentPoint.properties.speed !== undefined ? formatSpeed(currentPoint.properties.speed) : 'N/A';
+        speedElement.textContent = speed;
+    }
+    
+    if (timeElement) {
+        const time = currentPoint.properties.timestamp ? 
+            new Date(currentPoint.properties.timestamp).toLocaleTimeString() : 'Unknown';
+        timeElement.textContent = time;
+    }
+    
+    if (distanceElement) {
+        const distance = currentPoint.properties.distance !== undefined ? 
+            `${(currentPoint.properties.distance / 1000).toFixed(1)} km` : 'N/A';
+        distanceElement.textContent = distance;
+    }
+    
+    if (progressElement) {
+        const progress = appState.animationCoords.length > 0 ? 
+            Math.round((appState.animationIndex / appState.animationCoords.length) * 100) : 0;
+        progressElement.textContent = `${progress}%`;
+    }
 }

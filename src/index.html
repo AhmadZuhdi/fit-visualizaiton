@@ -44,6 +44,26 @@
         <img id="popup-image-src" alt="" style="width: 100%; height: 100%;">
     </div>
 
+    <!-- Animation Status Display -->
+    <div id="animation-status" class="animation-status" style="display: none;">
+        <div class="status-item" style="display: none;">
+            <span class="status-label">Speed:</span>
+            <span id="current-speed" class="status-value">0 km/h</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Time:</span>
+            <span id="current-time" class="status-value">00:00:00</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Distance:</span>
+            <span id="current-distance" class="status-value">0.0 km</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Progress:</span>
+            <span id="current-progress" class="status-value">0%</span>
+        </div>
+    </div>
+
     <!-- Main Controls -->
     <div class="controls">
         <button id="show-route" class="active">Show Route</button>
