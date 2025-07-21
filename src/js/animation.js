@@ -36,7 +36,7 @@ export function prepareAnimationData() {
     
     // Calculate 5% boundaries
     const totalPoints = allCoords.length;
-    const startIndex = Math.floor(totalPoints * 0.01);
+    const startIndex = Math.floor(totalPoints * 0.015);
     const endIndex = totalPoints - startIndex;
     
     // Use only the middle 90% of the route
@@ -193,7 +193,7 @@ export function animateStep() {
         stopAnimation();
         return;
     }
-      const currentPoint = appState.animationCoords[appState.animationIndex];
+    const currentPoint = appState.animationCoords[appState.animationIndex];
     const prevPoint = appState.animationIndex > 0 ? appState.animationCoords[appState.animationIndex - 1] : null;
     
     // Update animation status display

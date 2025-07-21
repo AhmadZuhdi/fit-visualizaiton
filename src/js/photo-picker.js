@@ -71,34 +71,75 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('EXIF Tags:', tags);
                 
                 if (tags.GPSLatitude && tags.GPSLongitude) {
-                    console.log('GPS Coordinates:', tags.GPSLatitude.description, tags.GPSLongitude.description);
-                    
-                    // Convert DMS to decimal degrees
-                    const lat = convertDMSToDecimal(tags.GPSLatitude.value, tags.GPSLatitudeRef?.value[0] || 'N');
-                    const lng = convertDMSToDecimal(tags.GPSLongitude.value, tags.GPSLongitudeRef?.value[0] || 'E');
-                    console.log('Converted to decimal:', lat, lng);
-                    
-                    const coor = [lat, lng];                    
-
-                    const marker = L.marker(coor, {
-                        icon: L.divIcon({
-                            className: 'photo-marker',
-                            html: `<div style="background: rgba(255, 255, 255, 0.8); padding: 4px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                            <img src="${URL.createObjectURL(file)}" style="width: 100%; height: auto; border-radius: 4px;">
-                            </div>`,
-                            iconSize: [60, 60],
-                            iconAnchor: [30, 30]
-                        })                
-                    })
-                    .addTo(appState.map);
-
-                    appState.images.push({
-                        marker,
-                        timestamp: tags.DateTimeOriginal ? parseExifDate(tags.DateTimeOriginal.description) : new Date()
-                    });
+                    // return handleWithMetadata(tags, file);
                 }
+
+                handleWithFileName(file);
             };
             reader.readAsArrayBuffer(file);
         });
     });
 });
+
+function handleWithMetadata(tags, file) {
+    console.log('GPS Coordinates:', tags.GPSLatitude.description, tags.GPSLongitude.description);
+                    
+    // Convert DMS to decimal degrees
+    const lat = convertDMSToDecimal(tags.GPSLatitude.value, tags.GPSLatitudeRef?.value[0] || 'N');
+    const lng = convertDMSToDecimal(tags.GPSLongitude.value, tags.GPSLongitudeRef?.value[0] || 'E');
+    console.log('Converted to decimal:', lat, lng);
+    
+    const coor = [lat, lng];                    
+
+    const marker = L.marker(coor, {
+        icon: L.divIcon({
+            className: 'photo-marker',
+            html: `<div style="background: rgba(255, 255, 255, 0.8); padding: 4px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            <img src="${URL.createObjectURL(file)}" style="width: 100%; height: auto; border-radius: 4px;">
+            </div>`,
+            iconSize: [60, 60],
+            iconAnchor: [30, 30]
+        })                
+    })
+    .addTo(appState.map);
+
+    appState.images.push({
+        marker,
+        timestamp: tags.DateTimeOriginal ? parseExifDate(tags.DateTimeOriginal.description) : new Date()
+    });
+}
+
+function handleWithFileName(file) {
+    const coor = [0, 0]; // Default coordinates if no EXIF data is available
+    console.log('Using file name for coordinates:', file.name);
+
+    const fileName = +(file.name.replace(/\.[^/.]+$/, "")); // Remove file extension
+
+    if(!fileName || isNaN(fileName)) {
+        console.warn('Invalid file name for coordinates:', file.name);
+        return;
+    }
+
+    if (appState.geoJsonData.features[fileName]) {
+        const feature = appState.geoJsonData.features[fileName];
+        const coords = feature.geometry.coordinates[0];
+        const coor = [coords[0], coords[1]];
+        
+        const marker = L.marker(coor, {
+            icon: L.divIcon({
+                className: 'photo-marker',
+                html: `<div style="background: rgba(255, 255, 255, 0.8); padding: 4px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                <img src="${URL.createObjectURL(file)}" style="width: 100%; height: auto; border-radius: 4px;">
+                </div>`,
+                iconSize: [60, 60],
+                iconAnchor: [30, 30]
+            })                
+        })
+        .addTo(appState.map);
+
+        appState.images.push({
+            marker,
+            timestamp: feature.properties.time || new Date()
+        });
+    }
+}
